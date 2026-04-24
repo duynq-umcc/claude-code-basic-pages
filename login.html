@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Nexus</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg:      '#090A14',
+            primary: '#DF6B33',
+            'primary-hover': '#C85B26',
+            surface: '#111827',
+            border:  '#1F2937',
+          },
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body:    ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background-color: #090A14; }
+
+    .input-group:focus-within .input-icon { color: #DF6B33; }
+    .social-btn:hover { border-color: #DF6B33; background: rgba(223,107,51,0.08); }
+    .social-btn:hover .social-icon { color: #DF6B33; }
+    .divider-line { flex: 1; height: 1px; background: #1F2937; }
+  </style>
+</head>
+
+<body class="font-body text-gray-300 min-h-screen flex items-center justify-center p-4">
+
+  <div class="w-full flex flex-col lg:flex-row rounded-2xl overflow-hidden shadow-2xl border border-[#1F2937]"
+       style="background:#111827; max-width:960px;">
+
+    <!-- Left Panel -->
+    <div class="hidden lg:flex flex-col justify-center items-start p-10 lg:p-14 w-1/2 relative overflow-hidden"
+         style="background: linear-gradient(135deg, #090A14 0%, #1a0f08 100%);">
+
+      <div class="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-20 pointer-events-none"
+           style="background: radial-gradient(circle, #DF6B33, transparent); filter: blur(60px);"></div>
+      <div class="absolute -bottom-16 -right-16 w-60 h-60 rounded-full opacity-10 pointer-events-none"
+           style="background: radial-gradient(circle, #DF6B33, transparent); filter: blur(50px);"></div>
+
+      <div class="relative z-10">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+               style="background:#DF6B33;">
+            <i data-lucide="zap" class="w-5 h-5 text-white"></i>
+          </div>
+          <span class="font-heading font-bold text-white text-xl tracking-tight">Nexus</span>
+        </div>
+
+        <h1 class="font-heading font-extrabold text-white text-4xl leading-tight mb-4">
+          Welcome back<br />to the future.
+        </h1>
+        <p class="font-body text-gray-400 text-base leading-relaxed max-w-sm">
+          Sign in to access your dashboard, manage your projects, and connect with your team — all in one place.
+        </p>
+
+        <div class="mt-10 space-y-3">
+          <div class="flex items-center gap-3">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center" style="background:#DF6B33;">
+              <i data-lucide="check" class="w-3 h-3 text-white"></i>
+            </div>
+            <span class="font-body text-sm text-gray-400">Secure &amp; encrypted authentication</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center" style="background:#DF6B33;">
+              <i data-lucide="check" class="w-3 h-3 text-white"></i>
+            </div>
+            <span class="font-body text-sm text-gray-400">Two-factor authentication support</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center" style="background:#DF6B33;">
+              <i data-lucide="check" class="w-3 h-3 text-white"></i>
+            </div>
+            <span class="font-body text-sm text-gray-400">SSO with Google, GitHub &amp; Facebook</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="w-full lg:w-1/2 p-8 sm:p-10 lg:p-14 flex flex-col justify-center">
+
+      <!-- Mobile logo -->
+      <div class="flex lg:hidden items-center gap-2 mb-8">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:#DF6B33;">
+          <i data-lucide="zap" class="w-4 h-4 text-white"></i>
+        </div>
+        <span class="font-heading font-bold text-white text-lg">Nexus</span>
+      </div>
+
+      <h2 class="font-heading font-extrabold text-white text-2xl sm:text-3xl mb-1">Sign in</h2>
+      <p class="font-body text-gray-500 text-sm mb-8">
+        Don't have an account?
+        <a href="register.html" class="font-medium hover:underline" style="color:#DF6B33;">Create account</a>
+      </p>
+
+      <!-- Social Buttons -->
+      <div class="grid grid-cols-3 gap-3 mb-6">
+        <button class="social-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#1F2937] transition-all duration-200 cursor-pointer">
+          <svg class="social-icon w-5 h-5 transition-colors" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span class="text-xs font-medium text-gray-300 hidden sm:inline">Google</span>
+        </button>
+
+        <button class="social-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#1F2937] transition-all duration-200 cursor-pointer">
+          <svg class="social-icon w-5 h-5 transition-colors" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          <span class="text-xs font-medium text-gray-300 hidden sm:inline">GitHub</span>
+        </button>
+
+        <button class="social-btn flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#1F2937] transition-all duration-200 cursor-pointer">
+          <svg class="social-icon w-5 h-5 transition-colors" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          <span class="text-xs font-medium text-gray-300 hidden sm:inline">Facebook</span>
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 mb-6">
+        <div class="divider-line"></div>
+        <span class="text-xs text-gray-500 font-body">or continue with email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Form -->
+      <form id="loginForm" class="space-y-4" novalidate>
+
+        <!-- Email -->
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5 font-body" for="email">
+            Email address
+          </label>
+          <div class="input-group relative flex items-center rounded-xl border transition-colors duration-200"
+               style="border-color:#1F2937; background:#090A14;"
+               id="emailWrapper">
+            <i data-lucide="mail" class="input-icon w-4 h-4 ml-4 text-gray-500 transition-colors pointer-events-none"></i>
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              autocomplete="email"
+              class="w-full bg-transparent text-sm text-white placeholder-gray-600 outline-none py-3 pl-3 pr-4 font-body"
+            />
+          </div>
+          <p class="error-msg text-xs mt-1 hidden" style="color:#EF4444;"></p>
+        </div>
+
+        <!-- Password -->
+        <div>
+          <label class="block text-xs font-medium text-gray-400 mb-1.5 font-body" for="password">
+            Password
+          </label>
+          <div class="input-group relative flex items-center rounded-xl border transition-colors duration-200"
+               style="border-color:#1F2937; background:#090A14;"
+               id="passwordWrapper">
+            <i data-lucide="lock" class="input-icon w-4 h-4 ml-4 text-gray-500 transition-colors pointer-events-none"></i>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              class="w-full bg-transparent text-sm text-white placeholder-gray-600 outline-none py-3 pl-3 pr-10 font-body"
+            />
+            <button type="button" id="togglePassword" class="absolute right-3 text-gray-500 hover:text-gray-300 transition-colors cursor-pointer">
+              <i data-lucide="eye" class="w-4 h-4" id="eyeIcon"></i>
+            </button>
+          </div>
+          <p class="error-msg text-xs mt-1 hidden" style="color:#EF4444;"></p>
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <div class="relative">
+              <input type="checkbox" id="remember" class="sr-only peer" />
+              <div class="w-5 h-5 rounded-md border border-[#1F2937] bg-transparent
+                          peer-checked:bg-[#DF6B33] peer-checked:border-[#DF6B33]
+                          transition-all duration-200 flex items-center justify-center"
+                   style="background:#090A14;"
+                   id="checkboxBox">
+                <i data-lucide="check" class="w-3 h-3 text-white hidden peer-checked:block" id="checkIcon"></i>
+              </div>
+            </div>
+            <span class="text-xs font-body text-gray-400">Remember me</span>
+          </label>
+          <a href="#" class="text-xs font-body hover:underline transition-colors" style="color:#DF6B33;">
+            Forgot password?
+          </a>
+        </div>
+
+        <!-- Submit -->
+        <button
+          type="submit"
+          id="submitBtn"
+          class="w-full py-3 rounded-xl text-sm font-heading font-semibold text-white transition-all duration-200 cursor-pointer mt-2 flex items-center justify-center gap-2"
+          style="background:#DF6B33;"
+          onmouseover="this.style.background='#C85B26'"
+          onmouseout="this.style.background='#DF6B33'"
+        >
+          <span id="btnText">Sign in</span>
+          <i data-lucide="arrow-right" class="w-4 h-4" id="btnArrow"></i>
+          <svg id="btnSpinner" class="animate-spin w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-gray-600 mt-8 font-body">
+        By signing in, you agree to our
+        <a href="#" class="hover:underline" style="color:#DF6B33;">Terms of Service</a>
+        &amp;
+        <a href="#" class="hover:underline" style="color:#DF6B33;">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Init Lucide icons
+    lucide.createIcons();
+
+    // Password toggle
+    const toggleBtn = document.getElementById('togglePassword');
+    const pwdInput  = document.getElementById('password');
+    const eyeIcon   = document.getElementById('eyeIcon');
+
+    toggleBtn.addEventListener('click', () => {
+      const isPassword = pwdInput.type === 'password';
+      pwdInput.type = isPassword ? 'text' : 'password';
+      eyeIcon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+      lucide.createIcons();
+    });
+
+    // Focus border glow
+    ['emailWrapper', 'passwordWrapper'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('focusin',  () => el.style.borderColor = '#DF6B33', true);
+      el.addEventListener('focusout',  () => el.style.borderColor = '#1F2937', true);
+    });
+
+    // Checkbox toggle
+    const rememberCB  = document.getElementById('remember');
+    const checkboxBox = document.getElementById('checkboxBox');
+    const checkIcon   = document.getElementById('checkIcon');
+
+    rememberCB.addEventListener('change', () => {
+      if (rememberCB.checked) {
+        checkboxBox.style.background = '#DF6B33';
+        checkboxBox.style.borderColor = '#DF6B33';
+        checkIcon.classList.remove('hidden');
+      } else {
+        checkboxBox.style.background = '#090A14';
+        checkboxBox.style.borderColor = '#1F2937';
+        checkIcon.classList.add('hidden');
+      }
+    });
+
+    // Form validation
+    const form       = document.getElementById('loginForm');
+    const emailEl    = document.getElementById('email');
+    const pwdEl      = document.getElementById('password');
+    const submitBtn  = document.getElementById('submitBtn');
+    const btnText    = document.getElementById('btnText');
+    const btnArrow   = document.getElementById('btnArrow');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    function showError(input, msg) {
+      const wrapper = input.closest('.input-group')?.parentElement;
+      const errEl   = wrapper?.querySelector('.error-msg');
+      if (errEl) { errEl.textContent = msg; errEl.classList.remove('hidden'); }
+      const borderWrapper = wrapper?.querySelector('.input-group');
+      if (borderWrapper) borderWrapper.style.borderColor = '#EF4444';
+    }
+
+    function clearError(input) {
+      const wrapper = input.closest('.input-group')?.parentElement;
+      const errEl   = wrapper?.querySelector('.error-msg');
+      if (errEl) errEl.classList.add('hidden');
+      const borderWrapper = wrapper?.querySelector('.input-group');
+      if (borderWrapper) borderWrapper.style.borderColor = '#1F2937';
+    }
+
+    emailEl.addEventListener('input', () => clearError(emailEl));
+    pwdEl.addEventListener('input',   () => clearError(pwdEl));
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      let valid = true;
+      const emailVal    = emailEl.value.trim();
+      const passwordVal = pwdEl.value.trim();
+
+      if (!emailVal) {
+        showError(emailEl, 'Email bắt buộc.');
+        valid = false;
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        showError(emailEl, 'Email không hợp lệ.');
+        valid = false;
+      }
+
+      if (!passwordVal) {
+        showError(pwdEl, 'Mật khẩu bắt buộc.');
+        valid = false;
+      } else if (passwordVal.length < 6) {
+        showError(pwdEl, 'Mật khẩu phải có ít nhất 6 ký tự.');
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      // Loading state
+      btnText.textContent  = 'Signing in...';
+      btnArrow.classList.add('hidden');
+      btnSpinner.classList.remove('hidden');
+      submitBtn.disabled   = true;
+      submitBtn.style.cursor = 'not-allowed';
+
+      setTimeout(() => {
+        btnText.textContent  = 'Sign in';
+        btnArrow.classList.remove('hidden');
+        btnSpinner.classList.add('hidden');
+        submitBtn.disabled  = false;
+        submitBtn.style.cursor = 'pointer';
+
+        // Success state
+        btnText.textContent   = '✓  Success';
+        btnText.style.color   = '#fff';
+        submitBtn.style.background = '#22C55E';
+        btnArrow.classList.add('hidden');
+
+        setTimeout(() => {
+          btnText.textContent  = 'Sign in';
+          btnText.style.color  = '#fff';
+          submitBtn.style.background = '#DF6B33';
+          btnArrow.classList.remove('hidden');
+        }, 2500);
+      }, 1500);
+    });
+  </script>
+</body>
+</html>
