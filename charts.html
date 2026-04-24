@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Báo Cáo Kinh Doanh — Nexus</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg:           '#090A14',
+            surface:      '#111827',
+            'surface-2':  '#1a2332',
+            border:       '#1F2937',
+            primary:      '#DF6B33',
+            'primary-hover': '#C85B26',
+            success:      '#22C55E',
+            error:         '#EF4444',
+            warning:      '#F59E0B',
+          },
+          fontFamily: {
+            heading: ['Poppins', 'sans-serif'],
+            body:    ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #090A14; color: #E5E7EB; font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #090A14; }
+    ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 3px; }
+    .tab-btn { padding: 8px 16px; border-radius: 10px; border: 1px solid #1F2937; background: transparent; color: #9CA3AF; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .tab-btn:hover { border-color: #DF6B33; color: #DF6B33; }
+    .tab-btn.active { border-color: #DF6B33; background: #DF6B33; color: #fff; }
+    .card { background: #111827; border: 1px solid #1F2937; border-radius: 16px; padding: 24px; }
+    canvas { max-height: 320px; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <div style="max-width:1400px;margin:0 auto;padding:24px 16px 40px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:40px;height:40px;border-radius:12px;background:#DF6B33;display:flex;align-items:center;justify-content:center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 style="font-family:Poppins,sans-serif;font-size:20px;font-weight:700;color:#fff">Nexus Analytics</h1>
+            <p style="font-size:12px;color:#6B7280">Báo cáo kinh doanh thương mại điện tử · Năm 2024</p>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="tab-btn active" data-tab="revenue">Doanh thu</button>
+          <button class="tab-btn" data-tab="profit">Kết quả KD</button>
+          <button class="tab-btn" data-tab="marketing">Marketing</button>
+          <button class="tab-btn" data-tab="employee">Top NV</button>
+          <button class="tab-btn" data-tab="region">Theo vùng</button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div id="kpi-row" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8"></div>
+
+      <!-- Tab Contents -->
+      <div id="tab-revenue" class="tab-content"></div>
+      <div id="tab-profit" class="tab-content" style="display:none"></div>
+      <div id="tab-marketing" class="tab-content" style="display:none"></div>
+      <div id="tab-employee" class="tab-content" style="display:none"></div>
+      <div id="tab-region" class="tab-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <script>
+  // ─── Data ───────────────────────────────────────────────────────────────────
+  const MONTHLY_REVENUE = [
+    {month:'Tháng 1',revenue:842000000,orders:1240,visitors:18450},
+    {month:'Tháng 2',revenue:728000000,orders:1080,visitors:16200},
+    {month:'Tháng 3',revenue:915000000,orders:1360,visitors:20150},
+    {month:'Tháng 4',revenue:1080000000,orders:1580,visitors:23800},
+    {month:'Tháng 5',revenue:1215000000,orders:1820,visitors:27600},
+    {month:'Tháng 6',revenue:1390000000,orders:2100,visitors:31500},
+    {month:'Tháng 7',revenue:1150000000,orders:1750,visitors:26800},
+    {month:'Tháng 8',revenue:1280000000,orders:1920,visitors:29400},
+    {month:'Tháng 9',revenue:1420000000,orders:2150,visitors:32100},
+    {month:'Tháng 10',revenue:1560000000,orders:2380,visitors:35200},
+    {month:'Tháng 11',revenue:1850000000,orders:2850,visitors:42800},
+    {month:'Tháng 12',revenue:2240000000,orders:3420,visitors:51600},
+  ];
+
+  const QUARTERLY_PROFIT = [
+    {quarter:'Q1/2024',revenue:2485000000,cost:1560000000,profit:925000000,margin:37.2},
+    {quarter:'Q2/2024',revenue:3685000000,cost:2280000000,profit:1405000000,margin:38.1},
+    {quarter:'Q3/2024',revenue:3850000000,cost:2420000000,profit:1430000000,margin:37.1},
+    {quarter:'Q4/2024',revenue:5650000000,cost:3500000000,profit:2150000000,margin:38.1},
+  ];
+
+  const CATEGORY_SALES = [
+    {category:'Điện tử',revenue:4200000000,growth:28.5,orders:8450,color:'#DF6B33'},
+    {category:'Thời trang',revenue:3150000000,growth:18.2,orders:12300,color:'#22C55E'},
+    {category:'Gia dụng',revenue:2180000000,growth:35.7,orders:6100,color:'#3B82F6'},
+    {category:'Sức khỏe',revenue:1860000000,growth:42.1,orders:4920,color:'#A855F7'},
+    {category:'Thể thao',revenue:1420000000,growth:12.3,orders:3850,color:'#EC4899'},
+    {category:'Khác',revenue:890000000,growth:5.8,orders:2200,color:'#F59E0B'},
+  ];
+
+  const MARKETING_METRICS = [
+    {channel:'Google Ads',spend:480000000,revenue:1680000000,roi:250,conversions:4200},
+    {channel:'Facebook Ads',spend:320000000,revenue:1120000000,roi:250,conversions:3100},
+    {channel:'SEO / Content',spend:180000000,revenue:760000000,roi:322,conversions:1850},
+    {channel:'TikTok Ads',spend:240000000,revenue:680000000,roi:183,conversions:2100},
+    {channel:'Email Marketing',spend:45000000,revenue:310000000,roi:589,conversions:980},
+    {channel:'Affiliate',spend:120000000,revenue:520000000,roi:333,conversions:1450},
+  ];
+
+  const TOP_PRODUCTS = [
+    {rank:1,name:'iPhone 15 Pro Max 256GB',category:'Điện tử',sold:2840,revenue:2840000000,rating:4.9},
+    {rank:2,name:'MacBook Air M3 13"',category:'Điện tử',sold:1820,revenue:3640000000,rating:4.8},
+    {rank:3,name:'Giày thể thao Nike Air Max',category:'Thể thao',sold:4200,revenue:1260000000,rating:4.7},
+    {rank:4,name:'Máy lọc không khí Xiaomi',category:'Gia dụng',sold:3150,revenue:945000000,rating:4.6},
+    {rank:5,name:'Bộ skincare 8 bước',category:'Sức khỏe',sold:5280,revenue:792000000,rating:4.8},
+    {rank:6,name:'Áo phông unisex vải cotton',category:'Thời trang',sold:8940,revenue:447000000,rating:4.5},
+    {rank:7,name:'Tai nghe AirPods Pro 2',category:'Điện tử',sold:3680,revenue:1656000000,rating:4.9},
+    {rank:8,name:'Bàn phím cơ Keychron K2',category:'Điện tử',sold:2560,revenue:768000000,rating:4.7},
+  ];
+
+  const WEEKLY_TREND = [
+    {day:'T2',revenue:520000000,orders:780},
+    {day:'T3',revenue:480000000,orders:720},
+    {day:'T4',revenue:510000000,orders:765},
+    {day:'T5',revenue:540000000,orders:810},
+    {day:'T6',revenue:680000000,orders:1020},
+    {day:'T7',revenue:820000000,orders:1230},
+    {day:'CN',revenue:750000000,orders:1125},
+  ];
+
+  const TOP_EMPLOYEES = [
+    {rank:1,name:'Nguyễn Minh Tuấn',region:'TP. Hồ Chí Minh',department:'Điện tử',sales:2840000000,orders:486,customers:312,growth:42.5,rating:4.9,avatar:'NM'},
+    {rank:2,name:'Trần Thị Lan Anh',region:'Hà Nội',department:'Thời trang',sales:2560000000,orders:521,customers:398,growth:38.2,rating:4.8,avatar:'TL'},
+    {rank:3,name:'Lê Hoàng Nam',region:'Đà Nẵng',department:'Gia dụng',sales:2180000000,orders:398,customers:245,growth:55.1,rating:4.9,avatar:'LH'},
+    {rank:4,name:'Phạm Quỳnh Chi',region:'Cần Thơ',department:'Sức khỏe',sales:1950000000,orders:445,customers:289,growth:48.7,rating:4.7,avatar:'PQ'},
+    {rank:5,name:'Võ Đình Khôi',region:'TP. Hồ Chí Minh',department:'Thể thao',sales:1720000000,orders:412,customers:267,growth:29.3,rating:4.8,avatar:'VD'},
+    {rank:6,name:'Đặng Mai Phương',region:'Hải Phòng',department:'Điện tử',sales:1580000000,orders:364,customers:218,growth:33.8,rating:4.6,avatar:'DM'},
+    {rank:7,name:'Bùi Tiến Đạt',region:'Cần Thơ',department:'Thời trang',sales:1410000000,orders:378,customers:234,growth:21.4,rating:4.7,avatar:'BT'},
+    {rank:8,name:'Hoàng Thu Hà',region:'Hà Nội',department:'Gia dụng',sales:1290000000,orders:341,customers:201,growth:18.9,rating:4.5,avatar:'HH'},
+    {rank:9,name:'Đỗ Minh Khoa',region:'Đà Nẵng',department:'Thể thao',sales:1180000000,orders:295,customers:178,growth:35.2,rating:4.8,avatar:'ĐM'},
+    {rank:10,name:'Nguyễn Thanh Hường',region:'Hải Phòng',department:'Sức khỏe',sales:1050000000,orders:268,customers:162,growth:22.1,rating:4.6,avatar:'NH'},
+  ];
+
+  const EMPLOYEE_MONTHLY = [
+    {month:'T1',top1:185000000,top2:168000000,top3:142000000},
+    {month:'T2',top1:172000000,top2:155000000,top3:135000000},
+    {month:'T3',top1:198000000,top2:181000000,top3:158000000},
+    {month:'T4',top1:215000000,top2:192000000,top3:168000000},
+    {month:'T5',top1:238000000,top2:214000000,top3:185000000},
+    {month:'T6',top1:256000000,top2:228000000,top3:198000000},
+    {month:'T7',top1:242000000,top2:215000000,top3:182000000},
+    {month:'T8',top1:258000000,top2:234000000,top3:201000000},
+    {month:'T9',top1:275000000,top2:248000000,top3:215000000},
+    {month:'T10',top1:292000000,top2:261000000,top3:228000000},
+    {month:'T11',top1:318000000,top2:285000000,top3:248000000},
+    {month:'T12',top1:356000000,top2:312000000,top3:278000000},
+  ];
+
+  const GEO_REVENUE = [
+    {region:'TP. Hồ Chí Minh',revenue:5680000000,orders:8650,customers:4820,growth:35.2,topProduct:'Điện tử',share:36.3},
+    {region:'Hà Nội',revenue:4120000000,orders:6280,customers:3680,growth:28.7,topProduct:'Thời trang',share:26.3},
+    {region:'Đà Nẵng',revenue:1860000000,orders:2840,customers:1620,growth:42.5,topProduct:'Gia dụng',share:11.9},
+    {region:'Cần Thơ',revenue:1420000000,orders:2150,customers:1280,growth:38.1,topProduct:'Sức khỏe',share:9.1},
+    {region:'Hải Phòng',revenue:1080000000,orders:1640,customers:940,growth:22.3,topProduct:'Điện tử',share:6.9},
+    {region:'Quảng Ninh',revenue:820000000,orders:1240,customers:720,growth:51.2,topProduct:'Thể thao',share:5.2},
+    {region:'Bình Dương',revenue:680000000,orders:1040,customers:580,growth:19.8,topProduct:'Thời trang',share:4.3},
+  ];
+
+  const GEO_QUARTERLY = [
+    {quarter:'Q1',hcm:1200000000,hn:890000000,dn:410000000,other:620000000},
+    {quarter:'Q2',hcm:1480000000,hn:1050000000,dn:490000000,other:780000000},
+    {quarter:'Q3',hcm:1520000000,hn:1080000000,dn:510000000,other:810000000},
+    {quarter:'Q4',hcm:1980000000,hn:1400000000,dn:650000000,other:1050000000},
+  ];
+
+  const KPI_CARDS = [
+    {label:'Tổng doanh thu',value:'15,67 tỷ',change:'+32.5%',icon:'trending-up',color:'#DF6B33'},
+    {label:'Tổng đơn hàng',value:'22.630',change:'+18.2%',icon:'shopping-bag',color:'#22C55E'},
+    {label:'Tỷ lệ chuyển đổi',value:'3.42%',change:'+0.5%',icon:'percent',color:'#3B82F6'},
+    {label:'Khách hàng mới',value:'8.420',change:'+25.3%',icon:'users',color:'#A855F7'},
+    {label:'AOV (VNĐ)',value:'692.000',change:'+12.1%',icon:'credit-card',color:'#EC4899'},
+    {label:'NPS Score',value:'72',change:'+3 pts',icon:'star',color:'#F59E0B'},
+  ];
+
+  // ─── Helpers ────────────────────────────────────────────────────────────────
+  const fmtVND = (n) => {
+    if (n >= 1e9) return (n / 1e9).toFixed(1) + ' tỷ';
+    if (n >= 1e6) return (n / 1e6).toFixed(0) + ' tr';
+    return n.toLocaleString('vi-VN');
+  };
+
+  const icons = {
+    'trending-up': '<path d="M23 6l-9.5 9.5-5-5L1 18M17 6h6v6"/>',
+    'shopping-bag': '<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>',
+    'percent': '<line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
+    'users': '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>',
+    'credit-card': '<rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+    'star': '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>',
+  };
+
+  const ChartInstances = {};
+
+  // ─── KPI Cards ─────────────────────────────────────────────────────────────
+  function renderKPICards() {
+    const container = document.getElementById('kpi-row');
+    container.innerHTML = KPI_CARDS.map(kpi => `
+      <div style="background:#111827;border:1px solid #1F2937;border-radius:16px;padding:16px 14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <div style="width:36px;height:36px;border-radius:10px;background:${kpi.color}22;display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${kpi.color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              ${icons[kpi.icon]}
+            </svg>
+          </div>
+        </div>
+        <div style="font-size:22px;font-weight:700;font-family:Poppins,sans-serif;color:#fff">${kpi.value}</div>
+        <div style="font-size:12px;color:#9CA3AF;margin-top:2px">${kpi.label}</div>
+        <div style="font-size:11px;color:#22C55E;margin-top:4px;font-weight:500">${kpi.change} ↑</div>
+      </div>
+    `).join('');
+  }
+
+  // ─── Tab Navigation ─────────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.getElementById('tab-' + tab).style.display = 'block';
+      Object.values(ChartInstances).forEach(c => c?.resize?.());
+    });
+  });
+
+  // ─── Destroy Chart ───────────────────────────────────────────────────────────
+  function destroyChart(id) {
+    if (ChartInstances[id]) {
+      ChartInstances[id].destroy();
+      delete ChartInstances[id];
+    }
+  }
+
+  // ─── Chart.js defaults ──────────────────────────────────────────────────────
+  const chartDefaults = {
+    color: '#9CA3AF',
+    borderColor: '#1F2937',
+    font: { family: "'Inter', sans-serif", size: 11 },
+  };
+
+  Chart.defaults.color = chartDefaults.color;
+  Chart.defaults.borderColor = chartDefaults.borderColor;
+  Chart.defaults.font.family = chartDefaults.font.family;
+  Chart.defaults.font.size = chartDefaults.font.size;
+
+  // ─── REVENUE Tab ────────────────────────────────────────────────────────────
+  function renderRevenueTab() {
+    const el = document.getElementById('tab-revenue');
+    el.innerHTML = `
+      <div style="margin-bottom:24px">
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Doanh thu theo tháng</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Tổng doanh thu 12 tháng năm 2024</p>
+          </div>
+          <canvas id="chart-revenue-area"></canvas>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:24px">
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Doanh thu theo ngày trong tuần</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Trung bình các ngày làm việc</p>
+          </div>
+          <canvas id="chart-weekly"></canvas>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Đơn hàng & Lượt truy cập</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">So sánh đơn hàng và visitors theo tháng</p>
+          </div>
+          <canvas id="chart-visitors"></canvas>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:24px">
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Doanh thu theo danh mục</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Phân bổ doanh thu theo nhóm sản phẩm</p>
+          </div>
+          <canvas id="chart-category-pie"></canvas>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Top sản phẩm bán chạy</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">8 sản phẩm có doanh thu cao nhất</p>
+          </div>
+          <div id="products-table"></div>
+        </div>
+      </div>
+    `;
+
+    // Revenue Area Chart
+    destroyChart('chart-revenue-area');
+    const ctxArea = document.getElementById('chart-revenue-area').getContext('2d');
+    const gradArea = ctxArea.createLinearGradient(0, 0, 0, 300);
+    gradArea.addColorStop(0, 'rgba(223,107,51,0.3)');
+    gradArea.addColorStop(1, 'rgba(223,107,51,0)');
+    ChartInstances['chart-revenue-area'] = new Chart(ctxArea, {
+      type: 'line',
+      data: {
+        labels: MONTHLY_REVENUE.map(d => d.month),
+        datasets: [{
+          label: 'Doanh thu',
+          data: MONTHLY_REVENUE.map(d => d.revenue),
+          borderColor: '#DF6B33',
+          borderWidth: 2,
+          backgroundColor: gradArea,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#DF6B33',
+          yAxisID: 'y',
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#111827',
+            borderColor: '#1F2937',
+            borderWidth: 1,
+            titleColor: '#9CA3AF',
+            bodyColor: '#E5E7EB',
+            callbacks: {
+              label: ctx => 'Doanh thu: ' + fmtVND(ctx.raw)
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: {
+            grid: { color: '#1F2937', drawBorder: false },
+            ticks: { color: '#6B7280', callback: v => fmtVND(v) }
+          }
+        }
+      }
+    });
+
+    // Weekly Bar Chart
+    destroyChart('chart-weekly');
+    ChartInstances['chart-weekly'] = new Chart(document.getElementById('chart-weekly').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: WEEKLY_TREND.map(d => d.day),
+        datasets: [{ label: 'Doanh thu', data: WEEKLY_TREND.map(d => d.revenue), backgroundColor: '#DF6B33', borderRadius: 6 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => 'Doanh thu: ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) } }
+        }
+      }
+    });
+
+    // Visitors Line Chart
+    destroyChart('chart-visitors');
+    const ctxVis = document.getElementById('chart-visitors').getContext('2d');
+    ChartInstances['chart-visitors'] = new Chart(ctxVis, {
+      type: 'line',
+      data: {
+        labels: MONTHLY_REVENUE.map(d => d.month),
+        datasets: [
+          { label: 'Đơn hàng', data: MONTHLY_REVENUE.map(d => d.orders), borderColor: '#22C55E', borderWidth: 2, tension: 0.4, pointRadius: 4, yAxisID: 'y' },
+          { label: 'Khách truy cập', data: MONTHLY_REVENUE.map(d => d.visitors), borderColor: '#3B82F6', borderWidth: 2, tension: 0.4, pointRadius: 4, yAxisID: 'y1' }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#9CA3AF', boxWidth: 12 } }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1 } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280' }, position: 'left' },
+          y1: { grid: { display: false }, ticks: { color: '#6B7280' }, position: 'right' }
+        }
+      }
+    });
+
+    // Category Pie Chart
+    destroyChart('chart-category-pie');
+    ChartInstances['chart-category-pie'] = new Chart(document.getElementById('chart-category-pie').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: CATEGORY_SALES.map(d => d.category),
+        datasets: [{ data: CATEGORY_SALES.map(d => d.revenue), backgroundColor: CATEGORY_SALES.map(d => d.color), borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: {
+          legend: { position: 'right', labels: { color: '#9CA3AF', boxWidth: 8, padding: 12, font: { size: 12 } } },
+          tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => ctx.label + ': ' + fmtVND(ctx.raw) } }
+        }
+      }
+    });
+
+    // Products Table
+    const pt = document.getElementById('products-table');
+    pt.innerHTML = `
+      <div style="overflow-x:auto;max-height:260px;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid #1F2937">
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">#</th>
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Sản phẩm</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Đã bán</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Doanh thu</th>
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Đánh giá</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${TOP_PRODUCTS.map(p => `
+              <tr style="border-bottom:1px solid #1F293733">
+                <td style="padding:10px 12px;text-align:center;color:#DF6B33;font-weight:700">${p.rank}</td>
+                <td style="padding:10px 12px;color:#E5E7EB;font-weight:500">${p.name}</td>
+                <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${p.sold.toLocaleString('vi-VN')}</td>
+                <td style="padding:10px 12px;text-align:right;color:#22C55E">${fmtVND(p.revenue)}</td>
+                <td style="padding:10px 12px;text-align:center;color:#F59E0B">★ ${p.rating}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // ─── PROFIT Tab ─────────────────────────────────────────────────────────────
+  function renderProfitTab() {
+    const el = document.getElementById('tab-profit');
+    el.innerHTML = `
+      <div style="margin-bottom:24px" class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Doanh thu & Lợi nhuận theo quý</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">So sánh revenue, cost và profit Q1–Q4/2024</p>
+        </div>
+        <canvas id="chart-profit-bar"></canvas>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:24px">
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Biên lợi nhuận theo quý (%)</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Tỷ lệ lợi nhuận trên doanh thu</p>
+          </div>
+          <canvas id="chart-margin-line"></canvas>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">So sánh chi phí & lợi nhuận</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Chi phí hoạt động vs lợi nhuận ròng</p>
+          </div>
+          <canvas id="chart-cost-profit-area"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Bảng tổng hợp kết quả kinh doanh</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">Chi tiết doanh thu, chi phí và lợi nhuận theo quý</p>
+        </div>
+        <div id="profit-table"></div>
+      </div>
+    `;
+
+    // Profit Bar Chart
+    destroyChart('chart-profit-bar');
+    ChartInstances['chart-profit-bar'] = new Chart(document.getElementById('chart-profit-bar').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: QUARTERLY_PROFIT.map(d => d.quarter),
+        datasets: [
+          { label: 'Doanh thu', data: QUARTERLY_PROFIT.map(d => d.revenue), backgroundColor: '#DF6B33', borderRadius: 6 },
+          { label: 'Chi phí', data: QUARTERLY_PROFIT.map(d => d.cost), backgroundColor: '#3B82F6', borderRadius: 6 },
+          { label: 'Lợi nhuận', data: QUARTERLY_PROFIT.map(d => d.profit), backgroundColor: '#22C55E', borderRadius: 6 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#9CA3AF', boxWidth: 12 } }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) } }
+        }
+      }
+    });
+
+    // Margin Line
+    destroyChart('chart-margin-line');
+    ChartInstances['chart-margin-line'] = new Chart(document.getElementById('chart-margin-line').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: QUARTERLY_PROFIT.map(d => d.quarter),
+        datasets: [{ label: 'Biên lợi nhuận', data: QUARTERLY_PROFIT.map(d => d.margin), borderColor: '#A855F7', borderWidth: 3, tension: 0.4, pointRadius: 6, pointBackgroundColor: '#A855F7' }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => ctx.raw + '%' } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => v + '%' }, min: 30, max: 45 }
+        }
+      }
+    });
+
+    // Cost vs Profit Area
+    destroyChart('chart-cost-profit-area');
+    const ctxCP = document.getElementById('chart-cost-profit-area').getContext('2d');
+    const gradCost = ctxCP.createLinearGradient(0, 0, 0, 240);
+    gradCost.addColorStop(0, 'rgba(59,130,246,0.4)');
+    gradCost.addColorStop(1, 'rgba(59,130,246,0)');
+    const gradProfit = ctxCP.createLinearGradient(0, 0, 0, 240);
+    gradProfit.addColorStop(0, 'rgba(34,197,94,0.4)');
+    gradProfit.addColorStop(1, 'rgba(34,197,94,0)');
+    ChartInstances['chart-cost-profit-area'] = new Chart(ctxCP, {
+      type: 'line',
+      data: {
+        labels: QUARTERLY_PROFIT.map(d => d.quarter),
+        datasets: [
+          { label: 'Chi phí', data: QUARTERLY_PROFIT.map(d => d.cost), borderColor: '#3B82F6', backgroundColor: gradCost, borderWidth: 2, fill: true, tension: 0.4 },
+          { label: 'Lợi nhuận', data: QUARTERLY_PROFIT.map(d => d.profit), borderColor: '#22C55E', backgroundColor: gradProfit, borderWidth: 2, fill: true, tension: 0.4 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#9CA3AF', boxWidth: 12 } }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) } }
+        }
+      }
+    });
+
+    // Profit Table
+    const pt = document.getElementById('profit-table');
+    pt.innerHTML = `
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid #1F2937">
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Quý</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Doanh thu</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Chi phí</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Lợi nhuận</th>
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Biên lợi nhuận</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${QUARTERLY_PROFIT.map(q => `
+              <tr style="border-bottom:1px solid #1F293733">
+                <td style="padding:10px 12px;color:#E5E7EB;font-weight:600">${q.quarter}</td>
+                <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${fmtVND(q.revenue)}</td>
+                <td style="padding:10px 12px;text-align:right;color:#3B82F6">${fmtVND(q.cost)}</td>
+                <td style="padding:10px 12px;text-align:right;color:#22C55E;font-weight:600">${fmtVND(q.profit)}</td>
+                <td style="padding:10px 12px;text-align:center"><span style="background:#22C55E22;color:#22C55E;padding:2px 8px;border-radius:6px;font-weight:600;font-size:12px">${q.margin}%</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // ─── MARKETING Tab ───────────────────────────────────────────────────────────
+  function renderMarketingTab() {
+    const el = document.getElementById('tab-marketing');
+    el.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:24px">
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Chi phí & Doanh thu theo kênh</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">So sánh spend và revenue marketing</p>
+          </div>
+          <canvas id="chart-mkt-spend"></canvas>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">ROI theo kênh Marketing</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Return on Investment cho từng kênh quảng cáo</p>
+          </div>
+          <canvas id="chart-mkt-roi"></canvas>
+        </div>
+      </div>
+      <div style="margin-bottom:24px" class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Số conversions theo kênh</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">Tổng conversions (đơn hàng) từ mỗi kênh marketing</p>
+        </div>
+        <canvas id="chart-mkt-conv"></canvas>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Chi tiết hiệu quả Marketing</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">Spend, revenue, ROI và conversions theo kênh</p>
+        </div>
+        <div id="mkt-table"></div>
+      </div>
+    `;
+
+    const roiColors = ['#DF6B33','#22C55E','#A855F7','#3B82F6','#EC4899','#F59E0B'];
+
+    // Spend vs Revenue (horizontal bar)
+    destroyChart('chart-mkt-spend');
+    ChartInstances['chart-mkt-spend'] = new Chart(document.getElementById('chart-mkt-spend').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: MARKETING_METRICS.map(d => d.channel),
+        datasets: [
+          { label: 'Chi phí', data: MARKETING_METRICS.map(d => d.spend), backgroundColor: '#3B82F6', borderRadius: { topRight: 0, bottomRight: 4 } },
+          { label: 'Doanh thu', data: MARKETING_METRICS.map(d => d.revenue), backgroundColor: '#DF6B33', borderRadius: { topRight: 4, bottomRight: 0 } },
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#9CA3AF', boxWidth: 12 } }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) } },
+          y: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
+        }
+      }
+    });
+
+    // ROI Bar
+    destroyChart('chart-mkt-roi');
+    ChartInstances['chart-mkt-roi'] = new Chart(document.getElementById('chart-mkt-roi').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: MARKETING_METRICS.map(d => d.channel),
+        datasets: [{ label: 'ROI %', data: MARKETING_METRICS.map(d => d.roi), backgroundColor: roiColors, borderRadius: 6 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => 'ROI: ' + ctx.raw + '%' } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280', maxRotation: 30 } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280' } }
+        }
+      }
+    });
+
+    // Conversions
+    destroyChart('chart-mkt-conv');
+    ChartInstances['chart-mkt-conv'] = new Chart(document.getElementById('chart-mkt-conv').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: MARKETING_METRICS.map(d => d.channel),
+        datasets: [{ label: 'Conversions', data: MARKETING_METRICS.map(d => d.conversions), backgroundColor: '#22C55E', borderRadius: 6 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => 'Conversions: ' + ctx.raw.toLocaleString('vi-VN') } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280' } }
+        }
+      }
+    });
+
+    // Table
+    const mt = document.getElementById('mkt-table');
+    mt.innerHTML = `
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid #1F2937">
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Kênh</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Chi phí (VNĐ)</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Doanh thu (VNĐ)</th>
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">ROI</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Conversions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${MARKETING_METRICS.map(m => {
+              const roiColor = m.roi >= 300 ? '#22C55E' : m.roi >= 200 ? '#F59E0B' : '#EF4444';
+              return `
+                <tr style="border-bottom:1px solid #1F293733">
+                  <td style="padding:10px 12px;color:#E5E7EB;font-weight:500">${m.channel}</td>
+                  <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${fmtVND(m.spend)}</td>
+                  <td style="padding:10px 12px;text-align:right;color:#22C55E">${fmtVND(m.revenue)}</td>
+                  <td style="padding:10px 12px;text-align:center"><span style="background:${roiColor}22;color:${roiColor};padding:3px 10px;border-radius:6px;font-weight:600;font-size:12px">${m.roi}%</span></td>
+                  <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${m.conversions.toLocaleString('vi-VN')}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // ─── EMPLOYEE Tab ───────────────────────────────────────────────────────────
+  function renderEmployeeTab() {
+    const el = document.getElementById('tab-employee');
+    el.innerHTML = `
+      <div style="margin-bottom:24px" class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Xu hướng doanh số top 3 nhân viên xuất sắc</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">Doanh số hàng tháng của 3 nhân viên dẫn đầu năm 2024</p>
+        </div>
+        <canvas id="chart-emp-trend"></canvas>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:24px">
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Top 10 nhân viên xuất sắc</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Xếp hạng theo doanh số Q4/2024</p>
+          </div>
+          <div id="emp-table"></div>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Doanh số top 10</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">So sánh doanh số giữa các nhân viên</p>
+          </div>
+          <canvas id="chart-emp-bar"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Chỉ số chi tiết nhân viên</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">Đơn hàng, khách hàng, tăng trưởng và rating</p>
+        </div>
+        <div id="emp-detail-table"></div>
+      </div>
+    `;
+
+    const medals = {1:'🥇',2:'🥈',3:'🥉'};
+    const empColors = ['#DF6B33','#E88033','#F09030','#3B82F6','#22C55E','#A855F7','#EC4899','#F59E0B','#6B7280','#4B5563'];
+
+    // Employee trend
+    destroyChart('chart-emp-trend');
+    ChartInstances['chart-emp-trend'] = new Chart(document.getElementById('chart-emp-trend').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: EMPLOYEE_MONTHLY.map(d => d.month),
+        datasets: [
+          { label: 'Nguyễn Minh Tuấn', data: EMPLOYEE_MONTHLY.map(d => d.top1), borderColor: '#DF6B33', borderWidth: 3, tension: 0.4, pointRadius: 4 },
+          { label: 'Trần Thị Lan Anh', data: EMPLOYEE_MONTHLY.map(d => d.top2), borderColor: '#22C55E', borderWidth: 2, tension: 0.4, pointRadius: 3 },
+          { label: 'Lê Hoàng Nam', data: EMPLOYEE_MONTHLY.map(d => d.top3), borderColor: '#3B82F6', borderWidth: 2, tension: 0.4, pointRadius: 3 },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#9CA3AF', boxWidth: 12 } }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) } }
+        }
+      }
+    });
+
+    // Employee bar (horizontal)
+    destroyChart('chart-emp-bar');
+    ChartInstances['chart-emp-bar'] = new Chart(document.getElementById('chart-emp-bar').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: TOP_EMPLOYEES.map(d => d.name),
+        datasets: [{ label: 'Doanh số', data: TOP_EMPLOYEES.map(d => d.sales), backgroundColor: empColors, borderRadius: { topRight: 6, bottomRight: 6 } }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => 'Doanh số: ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) } },
+          y: { grid: { display: false }, ticks: { color: '#9CA3AF', font: { size: 11 } } }
+        }
+      }
+    });
+
+    // Employee table
+    const et = document.getElementById('emp-table');
+    et.innerHTML = `
+      <div style="overflow-x:auto;max-height:320px;overflow-y:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid #1F2937">
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">#</th>
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Nhân viên</th>
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Khu vực</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Doanh số</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Đơn</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Tăng trưởng</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${TOP_EMPLOYEES.map(e => `
+              <tr style="border-bottom:1px solid #1F293733">
+                <td style="padding:10px 12px;text-align:center">
+                  ${medals[e.rank] ? '<span style="font-size:16px">' + medals[e.rank] + '</span>' : '<span style="color:#6B7280;font-weight:600">' + e.rank + '</span>'}
+                </td>
+                <td style="padding:10px 12px;color:#fff;font-weight:500">${e.name}</td>
+                <td style="padding:10px 12px;color:#6B7280;font-size:11px">${e.region}</td>
+                <td style="padding:10px 12px;text-align:right;color:#22C55E;font-weight:600">${fmtVND(e.sales)}</td>
+                <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${e.orders.toLocaleString('vi-VN')}</td>
+                <td style="padding:10px 12px;text-align:right;color:#22C55E;font-size:12px">+${e.growth}%</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    // Employee detail table
+    const edt = document.getElementById('emp-detail-table');
+    edt.innerHTML = `
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid #1F2937">
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Nhân viên</th>
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Phòng ban</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Đơn hàng</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Khách hàng</th>
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Tăng trưởng</th>
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${TOP_EMPLOYEES.map(e => `
+              <tr style="border-bottom:1px solid #1F293733">
+                <td style="padding:10px 12px;color:#E5E7EB;font-weight:500">${e.name}</td>
+                <td style="padding:10px 12px"><span style="background:#1F2937;padding:2px 8px;border-radius:6px;font-size:12px;color:#9CA3AF">${e.department}</span></td>
+                <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${e.orders.toLocaleString('vi-VN')}</td>
+                <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${e.customers.toLocaleString('vi-VN')}</td>
+                <td style="padding:10px 12px;text-align:center"><span style="background:#22C55E22;color:#22C55E;padding:3px 10px;border-radius:6px;font-weight:600;font-size:12px">+${e.growth}%</span></td>
+                <td style="padding:10px 12px;text-align:center;color:#F59E0B">★ ${e.rating}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // ─── REGION Tab ─────────────────────────────────────────────────────────────
+  function renderRegionTab() {
+    const el = document.getElementById('tab-region');
+    el.innerHTML = `
+      <div style="margin-bottom:24px" class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Doanh thu theo khu vực địa lý</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">Tổng doanh thu theo tỉnh/thành phố năm 2024</p>
+        </div>
+        <canvas id="chart-geo-bar"></canvas>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px;margin-bottom:24px">
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Doanh thu theo quý từng vùng</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">So sánh TP.HCM, Hà Nội, Đà Nẵng và các vùng khác</p>
+          </div>
+          <canvas id="chart-geo-quarter"></canvas>
+        </div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Số đơn hàng theo khu vực</h2>
+            <p style="font-size:13px;color:#6B7280;margin-top:2px">Tổng đơn hàng và khách hàng theo từng tỉnh/thành</p>
+          </div>
+          <canvas id="chart-geo-orders"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:20px">
+          <h2 style="font-family:Poppins,sans-serif;font-size:18px;font-weight:600;color:#fff">Chi tiết doanh thu theo khu vực</h2>
+          <p style="font-size:13px;color:#6B7280;margin-top:2px">Doanh thu, đơn hàng, khách hàng và tăng trưởng theo tỉnh/thành</p>
+        </div>
+        <div id="geo-table"></div>
+      </div>
+    `;
+
+    const geoColors = ['#DF6B33','#3B82F6','#22C55E','#A855F7','#EC4899','#F59E0B','#6B7280'];
+
+    // Geo bar
+    destroyChart('chart-geo-bar');
+    ChartInstances['chart-geo-bar'] = new Chart(document.getElementById('chart-geo-bar').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: GEO_REVENUE.map(d => d.region),
+        datasets: [{
+          label: 'Doanh thu',
+          data: GEO_REVENUE.map(d => d.revenue),
+          backgroundColor: geoColors,
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => 'Doanh thu: ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) } }
+        }
+      }
+    });
+
+    // Geo quarterly stacked
+    destroyChart('chart-geo-quarter');
+    ChartInstances['chart-geo-quarter'] = new Chart(document.getElementById('chart-geo-quarter').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: GEO_QUARTERLY.map(d => d.quarter),
+        datasets: [
+          { label: 'TP.HCM', data: GEO_QUARTERLY.map(d => d.hcm), backgroundColor: '#DF6B33' },
+          { label: 'Hà Nội', data: GEO_QUARTERLY.map(d => d.hn), backgroundColor: '#3B82F6' },
+          { label: 'Đà Nẵng', data: GEO_QUARTERLY.map(d => d.dn), backgroundColor: '#22C55E' },
+          { label: 'Vùng khác', data: GEO_QUARTERLY.map(d => d.other), backgroundColor: '#6B7280' },
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#9CA3AF', boxWidth: 12 } }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1, callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtVND(ctx.raw) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#6B7280' } },
+          y: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280', callback: v => fmtVND(v) }, stacked: true }
+        }
+      }
+    });
+
+    // Geo orders (horizontal)
+    destroyChart('chart-geo-orders');
+    ChartInstances['chart-geo-orders'] = new Chart(document.getElementById('chart-geo-orders').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: GEO_REVENUE.map(d => d.region),
+        datasets: [
+          { label: 'Đơn hàng', data: GEO_REVENUE.map(d => d.orders), backgroundColor: '#22C55E', borderRadius: { topRight: 0, bottomRight: 4 } },
+          { label: 'Khách hàng', data: GEO_REVENUE.map(d => d.customers), backgroundColor: '#3B82F6', borderRadius: { topRight: 4, bottomRight: 0 } },
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { labels: { color: '#9CA3AF', boxWidth: 12 } }, tooltip: { backgroundColor: '#111827', borderColor: '#1F2937', borderWidth: 1 } },
+        scales: {
+          x: { grid: { color: '#1F2937' }, ticks: { color: '#6B7280' } },
+          y: { grid: { display: false }, ticks: { color: '#9CA3AF' } }
+        }
+      }
+    });
+
+    // Geo table
+    const gt = document.getElementById('geo-table');
+    gt.innerHTML = `
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="border-bottom:1px solid #1F2937">
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Khu vực</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Doanh thu</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Đơn hàng</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Khách hàng</th>
+              <th style="padding:10px 12px;text-align:left;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Sản phẩm top</th>
+              <th style="padding:10px 12px;text-align:center;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Tăng trưởng</th>
+              <th style="padding:10px 12px;text-align:right;color:#6B7280;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em">Chiếm (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${GEO_REVENUE.map(g => `
+              <tr style="border-bottom:1px solid #1F293733">
+                <td style="padding:10px 12px;color:#fff;font-weight:600">${g.region}</td>
+                <td style="padding:10px 12px;text-align:right;color:#22C55E;font-weight:600">${fmtVND(g.revenue)}</td>
+                <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${g.orders.toLocaleString('vi-VN')}</td>
+                <td style="padding:10px 12px;text-align:right;color:#E5E7EB">${g.customers.toLocaleString('vi-VN')}</td>
+                <td style="padding:10px 12px"><span style="background:#1F2937;padding:2px 8px;border-radius:6px;font-size:12px;color:#DF6B33">${g.topProduct}</span></td>
+                <td style="padding:10px 12px;text-align:center"><span style="background:#22C55E22;color:#22C55E;padding:3px 10px;border-radius:6px;font-weight:600;font-size:12px">+${g.growth}%</span></td>
+                <td style="padding:10px 12px;text-align:right">
+                  <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                    <div style="width:60px;height:6px;background:#1F2937;border-radius:3px;overflow:hidden">
+                      <div style="width:${g.share}%;height:100%;background:#DF6B33;border-radius:3px"></div>
+                    </div>
+                    <span style="color:#9CA3AF;font-size:12px">${g.share}%</span>
+                  </div>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // ─── Init ───────────────────────────────────────────────────────────────────
+  renderKPICards();
+  renderRevenueTab();
+  renderProfitTab();
+  renderMarketingTab();
+  renderEmployeeTab();
+  renderRegionTab();
+  </script>
+</body>
+</html>
